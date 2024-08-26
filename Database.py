@@ -13,260 +13,112 @@ class Database:
                 "mongodb+srv://SecondRodeoPython:SecondRodeoPythonPassword@cluster0.ys6mzzd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
             )
             # Access the SecondRodeo database
-            self.db = self.client["SecondRodeo"]
-            self.contractors = self.db["contractors"]
+            self.db = self.client["SecondRodeoData"]
+            self.bull = self.db["bull"]
+            self.calf = self.db["calf"]
+            self.bronc = self.db["bronc"]
+            self.steer = self.db["steer"]
+            self.contractors = self.db["contractorcredentials"]
             print("Connected to MongoDB.\n")
         except Exception as e:
             print(f"An error occurred while connecting to MongoDB: {e}\n")
 
-
-    # Method to add a contractor to the database
-    def addContractor(self, contractorName):
+    # Method to insert a calf into the database
+    def insertCalf(self, earTag, contractorName, kick, speed, direction):
         try:
-            print(f"Attempting to add contractor: {contractorName}\n")
-            # Insert the contractor with the provided name
-            result = self.contractors.insert_one({
-                "contractorName": contractorName,
-                "stock": [
-                    {"calfs": []},
-                    {"steers": []},
-                    {"bulls": []},
-                    {"broncs": []}
-                ]
-            })
-            print(f"Contractor added with ID: {result.inserted_id}")
-        except Exception as e:
-            print(f"An error occurred while adding the contractor: {e}")
-
-
-    # Method to add a calf to the database
-    def addCalf(self, earTag, contractorName, kick, speed, direction):
-        try:
-            # Check if the contractor with the given name
-            contractor = self.contractors.find_one({"contractorName": contractorName})
-
-            # If the contractor exists
-            if contractor:
-                # Check if the calf with the given earTag already exists
-                result = self.contractors.update_one(
-                    {
-                        "contractorName": contractorName,
-                        "stock.0.calfs.earTag": earTag
-                    },
-                    {
-                        "$push": {
-                            "stock.0.calfs.$.runInfo": {
-                                "kick": kick,
-                                "speed": speed,
-                                "direction": direction
-                            }
-                        }
-                    }
-                )
-
-                # If the calf does not exist, insert a new calf with the provided earTag and runInfo
-                if result.matched_count == 0:
-                    print(f"Adding new calf with earTag {earTag}...\n")
-                    # Insert new calf with provided earTag and runInfo
-                    result = self.contractors.update_one(
-                        {"contractorName": contractorName},
-                        {
-                            "$push": {
-                                "stock.0.calfs": {
-                                    "earTag": earTag,
-                                    "runInfo": [
-                                        {
-                                            "kick": kick,
-                                            "speed": speed,
-                                            "direction": direction
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        upsert=True
-                    )
-
-                print(f"Update result: Matched {result.matched_count}, Modified {result.modified_count}\n")
+            if kick == "True":
+                kick = True
             else:
-                print("Contractor not found.\n")
+                kick = False
+            # Create a calf dictionary
+            calf = {
+                "earTag": earTag,
+                "organization": contractorName,
+                "kick": kick,
+                "speed": speed,
+                "direction": direction
+            }
+            # Insert the calf into the collection
+            self.db.calf.insert_one(calf)
+            print("Calf inserted successfully.\n")
         except Exception as e:
-            print(f"An error occurred while adding the calf: {e}\n")
+            print(f"An error occurred while inserting calf: {e}\n")
 
-
-    # Method to add a steer to the database
-    def addSteer(self, earTag, contractorName, stop, speed, direction):
+    # Method to insert a bull into the database
+    def insertBull(self, earTag, contractorName, straight, speed, direction):
         try:
-            # Check if the contractor with the given name
-            contractor = self.contractors.find_one({"contractorName": contractorName})
-
-            # If the contractor exists
-            if contractor:
-                # Check if the steer with the given earTag already exists
-                result = self.contractors.update_one(
-                    {
-                        "contractorName": contractorName,
-                        "stock.1.steers.earTag": earTag
-                    },
-                    {
-                        "$push": {
-                            "stock.1.steers.$.runInfo": {
-                                "stop": stop,
-                                "speed": speed,
-                                "direction": direction
-                            }
-                        }
-                    }
-                )
-
-                # If the steer does not exist, insert a new steer with the provided earTag and runInfo
-                if result.matched_count == 0:
-                    print(f"Adding new steer with earTag {earTag}...\n")
-                    result = self.contractors.update_one(
-                        {"contractorName": contractorName},
-                        {
-                            "$push": {
-                                "stock.1.steers": {
-                                    "earTag": earTag,
-                                    "runInfo": [
-                                        {
-                                            "stop": stop,
-                                            "speed": speed,
-                                            "direction": direction
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        upsert=True
-                    )
-
-                print(f"Update result: Matched {result.matched_count}, Modified {result.modified_count}\n")
+            if straight == "True":
+                straight = True
             else:
-                print("Contractor not found.\n")
+                straight = False
+            # Create a bull dictionary
+            bull = {
+                "earTag": earTag,
+                "organization": contractorName,
+                "straight": straight,
+                "speed": speed,
+                "direction": direction
+            }
+            # Insert the bull into the collection
+            self.db.bull.insert_one(bull)
+            print("Bull inserted successfully.\n")
         except Exception as e:
-            print(f"An error occurred while adding the steer: {e}\n")
+            print(f"An error occurred while inserting bull: {e}\n")
 
-
-    # Method to add a bull to the database
-    def addBull(self, earTag, contractorName, straight, speed, direction):
+    # Method to insert a steer into the database
+    def insertSteer(self, earTag, contractorName, stop, speed, direction):
         try:
-            # Check if the contractor with the given name
-            contractor = self.contractors.find_one({"contractorName": contractorName})
-
-            # If the contractor exists
-            if contractor:
-                # Check if the bull with the given earTag already exists
-                result = self.contractors.update_one(
-                    {
-                        "contractorName": contractorName,
-                        "stock.2.bulls.earTag": earTag
-                    },
-                    {
-                        "$push": {
-                            "stock.2.bulls.$.runInfo": {
-                                "straight": straight,
-                                "speed": speed,
-                                "direction": direction
-                            }
-                        }
-                    }
-                )
-
-                # If the bull does not exist, insert a new bull with the provided earTag and runInfo
-                if result.matched_count == 0:
-                    print(f"Adding new bull with earTag {earTag}...")
-                    result = self.contractors.update_one(
-                        {"contractorName": contractorName},
-                        {
-                            "$push": {
-                                "stock.2.bulls": {
-                                    "earTag": earTag,
-                                    "runInfo": [
-                                        {
-                                            "straight": straight,
-                                            "speed": speed,
-                                            "direction": direction
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        upsert=True
-                    )
-                print(f"Update result: Matched {result.matched_count}, Modified {result.modified_count}\n")
+            if stop == "True":
+                stop = True
             else:
-                print("Contractor not found.\n")
+                stop = False
+            # Create a steer dictionary
+            steer = {
+                "earTag": earTag,
+                "organization": contractorName,
+                "stop": stop,
+                "speed": speed,
+                "direction": direction
+            }
+            # Insert the steer into the collection
+            self.db.steer.insert_one(steer)
+            print("Steer inserted successfully.\n")
         except Exception as e:
-            print(f"An error occurred while adding the bull: {e}\n")
+            print(f"An error occurred while inserting steer: {e}\n")
 
 
-    # Method to add a bronc to the database
-    def addBronc(self, earTag, contractorName, straight, speed, direction,  flankTightness):
+    # Method to insert a bronc into the database
+    def insertBronc(self, earTag, contractorName, flankTightness, straight, speed, direction):
         try:
-            # Check if the contractor with the given name
-            contractor = self.contractors.find_one({"contractorName": contractorName})
-
-            # If the contractor exists
-            if contractor:
-                # Check if the bronc with the given earTag already exists
-                result = self.contractors.update_one(
-                    {
-                        "contractorName": contractorName,
-                        "stock.3.broncs.earTag": earTag
-                    },
-                    {
-                        "$push": {
-                            "stock.3.broncs.$.runInfo": {
-                                "straight": straight,
-                                "speed": speed,
-                                "direction": direction,
-                                "flankTightness": flankTightness
-                            }
-                        }
-                    }
-                )
-
-                # If the bronc does not exist, insert a new bronc with the provided earTag and runInfo
-                if result.matched_count == 0:
-                    print(f"Adding new bronc with earTag {earTag}...")
-                    result = self.contractors.update_one(
-                        {"contractorName": contractorName},
-                        {
-                            "$push": {
-                                "stock.3.broncs": {
-                                    "earTag": earTag,
-                                    "runInfo": [
-                                        {
-                                            "straight": straight,
-                                            "speed": speed,
-                                            "direction": direction,
-                                            "flankTightness": flankTightness
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        upsert=True
-                    )
-
-                print(f"Update result: Matched {result.matched_count}, Modified {result.modified_count}\n")
+            if straight == "True":
+                straight = True
             else:
-                print("Contractor not found.\n")
+                straight = False
+            # Create a bronc dictionary
+            bronc = {
+                "earTag": earTag,
+                "organization": contractorName,
+                "flankTightness": int(flankTightness),
+                "straight": straight,
+                "speed": speed,
+                "direction": direction
+            }
+            # Insert the bronc into the collection
+            self.db.bronc.insert_one(bronc)
+            print("Bronc inserted successfully.\n")
         except Exception as e:
-            print(f"An error occurred while adding the bronc: {e}\n")
+            print(f"An error occurred while inserting bronc: {e}\n")
 
 
     # Method to retrieve all contractors from the database
     def getContractors(self):
         try:
             # Find all contractors in the collection
-            contractors_cursor = self.contractors.find({}, {"_id": 0, "contractorName": 1})
+            contractors_cursor = self.contractors.find({}, {"_id": 0, "organization": 1})
 
             # Extract the contractor names into a list
-            contractors_list = [contractor['contractorName'] for contractor in contractors_cursor]
+            contractors_list = [contractor['organization'] for contractor in contractors_cursor]
             return contractors_list
         except Exception as e:
             print(f"An error occurred while retrieving contractors: {e}")
             return []  # Return an empty list in case of error
-
