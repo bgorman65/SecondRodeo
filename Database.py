@@ -1,5 +1,6 @@
 import pymongo
-
+import os
+from dotenv import load_dotenv, dotenv_values
 
 # Database class to handle all MongoDB operations
 class Database:
@@ -8,10 +9,10 @@ class Database:
     # Constructor to initialize the MongoDB client and database
     def __init__(self):
         try:
+            load_dotenv()
+
             # Connect to MongoDB Atlas
-            self.client = pymongo.MongoClient(
-                "mongodb+srv://SecondRodeoPython:SecondRodeoPythonPassword@cluster0.ys6mzzd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-            )
+            self.client = pymongo.MongoClient(os.getenv("MONGO_URI")            )
             # Access the SecondRodeo database
             self.db = self.client["SecondRodeoData"]
             self.bull = self.db["bull"]

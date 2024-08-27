@@ -109,8 +109,7 @@ class SteerEntryFrame(ctk.CTkFrame):
         # Adding the calf to the database
         self.database.insertSteer(steer.getET(), "test", steer.getStop(), steer.getSpeed(), steer.getDirection())
         self.ear_tag_entry.delete(0, ctk.END)
-        
-        
+
         
 # bull Entry Frame
 class BullEntryFrame(ctk.CTkFrame):
