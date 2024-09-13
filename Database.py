@@ -12,7 +12,7 @@ class Database:
             load_dotenv()
 
             # Connect to MongoDB Atlas
-            self.client = pymongo.MongoClient(os.getenv("MONGO_URI")            )
+            self.client = pymongo.MongoClient(os.getenv("MONGO_URI"))
             # Access the SecondRodeo database
             self.db = self.client["SecondRodeoData"]
             self.bull = self.db["bull"]
